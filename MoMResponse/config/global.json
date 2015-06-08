@@ -1,0 +1,14 @@
+{
+  "global": {
+    "parseVersion": "1.4.2"
+  },
+  "applications": {
+    "ChicagoTigers": {
+      "applicationId": "nhBnDWutg21Cyx4d6y8RlgKnLtZv1j7jEdt7IKC5",
+      "masterKey": "wXX88McWTItUy64HZBxdHx6K6ZbPKV7rYht4m6LX"
+    },
+    "_default": {
+      "link": "ChicagoTigers"
+    }
+  }
+}
