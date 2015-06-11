@@ -1,0 +1,133 @@
+<!doctype html>
+<head>
+  <meta charset="utf-8">
+  <title>Chicago Tigers - MoM Response</title>
+  <meta name="description" content="My Parse App">
+  <meta name="viewport" content="width=device-width">
+  <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap.min.css" rel="stylesheet">
+  <link href="css/site.css" rel="stylesheet" type="text/css">
+  <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
+  <script type="text/javascript" src="http://www.parsecdn.com/js/parse-1.4.2.min.js"></script>
+  <script type="text/javascript" src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js"></script>
+  <script type="text/javascript" src="js/myScript.js"></script>
+</head>
+<body>
+  <div id="divRecordResponse">
+
+  </div>
+  <div id="divCreateNewMoM" style="width:450px; border: solid 1px; position:absolute; top:50px; left:50%; margin-left:-220px; padding:10px;">
+
+    <fieldset>
+
+      <!-- Form Name -->
+      <legend>Create Man of the Match Options</legend>
+
+      <!-- Text input-->
+      <div class="control-group">
+        <label class="control-label" for="textGameID">Game ID</label>
+        <div class="controls">
+          <input id="textGameID" name="textGameID" type="text" placeholder="Game ID" class="form-control">
+
+        </div>
+      </div>
+
+      <!-- Text input-->
+      <div class="control-group">
+        <label class="control-label" for="txtOpposition">Opposition Team</label>
+        <div class="controls">
+          <input id="txtOpposition" name="txtOpposition" type="text" placeholder="Opposition " class="form-control">
+
+        </div>
+      </div>
+
+      <!-- Text input-->
+      <div class="control-group">
+        <label class="control-label" for="txtGameDate">Game Date</label>
+        <div class="controls">
+          <input id="txtGameDate" name="txtGameDate" type="text" placeholder="Game Date" class="form-control">
+
+        </div>
+      </div>
+
+      <!-- Textarea -->
+      <div class="control-group">
+        <label class="control-label" for="txtOption1">Option 1</label>
+        <div class="controls">                     
+          <textarea id="txtOption1" name="txtOption1" class="form-control"></textarea>
+        </div>
+      </div>
+
+      <!-- Textarea -->
+      <div class="control-group">
+        <label class="control-label" for="txtOption2">Option 2</label>
+        <div class="controls">                     
+          <textarea id="txtOption2" name="txtOption2" class="form-control"></textarea>
+        </div>
+      </div>
+
+      <!-- Textarea -->
+      <div class="control-group">
+        <label class="control-label" for="txtOption3">Option 3</label>
+        <div class="controls">                     
+          <textarea id="txtOption3" name="txtOption3" class="form-control"></textarea>
+        </div>
+      </div>
+
+      <!-- Textarea -->
+      <div class="control-group">
+        <label class="control-label" for="txtOption4">Option 4</label>
+        <div class="controls">                     
+          <textarea id="txtOption4" name="txtOption4" class="form-control"></textarea>
+        </div>
+      </div>
+      <br>
+      <div class="control-group">
+
+        <div class="controls">                     
+          <button id="btnCreateMoM" name="btnCreateMoM" class="btn btn-primary">Submit</button>
+        </div>
+      </div>
+
+    </fieldset>
+    
+  </div>
+  <script type="text/javascript">
+    Parse.initialize("nhBnDWutg21Cyx4d6y8RlgKnLtZv1j7jEdt7IKC5", "FTv9XyJAsHVGl6DqufVheLlQNK8Y37fVVceC6CKH");
+    $(document).ready(function(){
+      if(getQueryStringByName('AddNew') === 'y'){
+        $('#btnCreateMoM').bind("click", AddNewGame);
+      }else{$('#divCreateNewMoM').remove();}
+   });
+
+    function getQueryStringByName(name) {
+      name = name.replace(/[\[]/, "\\[").replace(/[\]]/, "\\]");
+      var regex = new RegExp("[\\?&]" + name + "=([^&#]*)"),
+      results = regex.exec(location.search);
+      return results === null ? "" : decodeURIComponent(results[1].replace(/\+/g, " "));
+    }
+
+    function AddNewGame(){
+      var MoMGamesObject = Parse.Object.extend("MoMGames");
+      var tmomgamesbject = new MoMGamesObject();
+      tmomgamesbject.save({GameID: $('#textGameID').val(), Opposition : $('#txtOpposition').val(), GameDate : $('#txtGameDate').val(), Option1 : $('#txtOption1').val(), Option2 : $('#txtOption2').val(), Option3 : $('#txtOption3').val(), Option4 : $('#txtOption4').val()}, {
+        success: function(object){
+         BootstrapDialog.show({
+          title: 'Success',
+          message: 'Game Added Successfully !!!'
+        });
+         $('#divCreateNewMoM input').val('');
+         $('#divCreateNewMoM textarea').val('');
+       },
+       error: function(model, error) {
+         BootstrapDialog.show({
+          title: 'Error',
+          message: 'Some Error Occured.'
+        });
+         console.log(error.message);
+       }
+     });
+    }
+  </script>
+</body>
+
+</html>
