@@ -26,10 +26,13 @@ Parse.Cloud.afterSave("MoMGames", function(request) {
 				})
 			}},
 			error: function(error) {
-				alert("Error: " + error.code + " " + error.message);
+				console.log("Error: " + error.code + " " + error.message);
 			}
 		});
 });
+
+
+
 
 function sendEmail(text,subject,fromEmail,fromName,toEmail,toName)
 {
