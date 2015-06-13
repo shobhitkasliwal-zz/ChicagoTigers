@@ -19,7 +19,14 @@ Parse.Cloud.afterSave("MoMGames", function(request) {
 				var momResponsebject = new MoMResponse();
 				momResponsebject.save({UID:uid, MoMResponseGameId : objectId, PlayerId : playerid}, {
 					success: function(object){
-						sendEmail('This is a test','Test Email', 'ChicagoTigers@chicric.com','Chicago Tigers Admin', 'shobhit.kasliwal@gmail.com','Shobhit Kasliwal');
+						try{
+						var EmailSubject = "Chicago Tigers MoM Selection : " + request.object.get("Opposition");
+						var EmailBody = "Please <a href='http://momresponse.chicric.com/?pid=" + playerid + "&rid=" + objectId+ "'> click here </a> to submit your vote for Player of the game. ";
+						console.log(EmailBody);
+						sendEmail(EmailBody,EmailSubject, 'ChicagoTigers@chicric.com','Chicago Tigers Admin', email,name);
+					} catch(err){
+						console.log(err);
+					}
 					},
 					error: function(model, error) {
 					}    

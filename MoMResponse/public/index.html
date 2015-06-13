@@ -14,7 +14,7 @@
 </head>
 <body>
   <header>
-    <div style="float:left;">
+    <div style="float:left; padding-left:10px; ">
       <img src="css/Logo.png" width="50" height="50" />
     </div>
     <div style="float:left; padding-left:10px;">
@@ -26,23 +26,23 @@
 
       <div class="container-fluid">
         <div class="text-center">
-          <h1>Player of the Match</h1>
-          <p class="lead">Game: <label id="lblopposition"></label> 
+          <h3>Player of the Match</h3>
+          <p>Game: <label id="lblopposition"></label> 
           </p>
-          <p class="lead">Date: <label id="lblGameDate"></label> 
+          <p>Date: <label id="lblGameDate"></label> 
+          </p>
+          <p>Result: <label id="lblGameResult"></label> 
           </p>
         </div>
-        <div>Your Vote: </div>
+        
         <div class="row">
-          <div class="col-sm-6 col-lg-4" id="divOptions">
-            <div class="form-group">
-              <label for="inputEmail" class="col-md-4 control-label">Email:</label>
-              <div class="col-md-8">
-                <input type="email" class="form-control" id="inputEmail" placeholder="Email">
-              </div>
+          <fieldset><legend>Your Vote</legend>
+            <div   id="divOptions">
             </div>
-          </div>
-
+          </fieldset>
+          <br>  
+          <div id="divAlreadySelectedMsg"></div>
+          <input type="button" id="btnSubmitVote" value="submit" /> 
         </div><!-- /.row this actually does not appear to be needed with the form-horizontal -->
 
 
@@ -137,6 +137,8 @@
   <script type="text/javascript">
     Parse.initialize("nhBnDWutg21Cyx4d6y8RlgKnLtZv1j7jEdt7IKC5", "FTv9XyJAsHVGl6DqufVheLlQNK8Y37fVVceC6CKH");
     $(document).ready(function(){
+      $('input:radio').filter(':checked').parent().addClass('checked');
+
       $('#divInvalidPage').hide();
       if(getQueryStringByName('AddNew') === 'y'){
         addNewMoM();
@@ -171,52 +173,116 @@
 
        query.get(rid, {
         success: function(object) {
+         $('#divAlreadySelectedMsg').html('');
          var playerid = object.id.toString();
          var Opposition = object.get('Opposition');
          var GameDate = object.get('GameDate');
+         var Result = object.get('Result');
          var Option1 = object.get('Option1');
          var Option2 = object.get('Option2');
          var Option3 = object.get('Option3');
          var Option4 = object.get('Option4');
+         var selectedVal = '';
+
+         var MoMResponse = Parse.Object.extend("MoMResponse");
+         var query = new Parse.Query(MoMResponse);
+         query.equalTo("PlayerId", pid);
+         query.equalTo("MoMResponseGameId", rid);
+         query.first({
+          success: function(results) {
+
+            selectedVal = results.get("ResponseOption");
+            setTimeout(function(){ 
+              if(selectedVal && selectedVal.length > 0){
+              $('#' + selectedVal).prop('checked',true);
+                $('input:radio').filter(':checked').parent().addClass('checked');
+
+            }},200);
+            
+          },error: function(error){}});
+
          $('#lblopposition').html('Chicago Tigers Vs ' + Opposition);
-       },
-       error: function(error) {
-        $('#divRecordResponse').remove();
-        $('#divInvalidPage').show();
-        console.log("Error: " + error.code + " " + error.message);
-      }
-    });
+         $('#lblGameResult').html(Result);
+         $('#lblGameDate').html(GameDate);
+         var template = '<div style=padding:10px;><input style="display:inline;" type="radio"  name="MoMOptions" id="Option#index#" value="#value#"></input><label for="Option#index#" style="padding-left:10px;">#data#</label></div>';
+         var optionsHtml = '';
+         if (Option1 && Option1.length > 0)
+          optionsHtml = optionsHtml + template.replace(/#index#/g,1).replace('#data#',Option1).replace('#value#','Option1');
+
+        if (Option2 && Option2.length > 0)
+          optionsHtml = optionsHtml + template.replace(/#index#/g,2).replace('#data#',Option2).replace('#value#','Option2');
+
+        if (Option3 && Option3.length > 0)
+          optionsHtml = optionsHtml + template.replace(/#index#/g,3).replace('#data#',Option3).replace('#value#','Option3');
+
+        if (Option4 && Option4.length > 0)
+          optionsHtml = optionsHtml + template.replace(/#index#/g,4).replace('#data#',Option4).replace('#value#','Option4');
+
+        $('#divOptions').html(optionsHtml);
+
+        $('#btnSubmitVote').unbind('click').bind('click',function(){
+          var Responseobjectid = '';
+          var MoMResponse = Parse.Object.extend("MoMResponse");
+          var query = new Parse.Query(MoMResponse);
+          query.equalTo("PlayerId", pid);
+          query.equalTo("MoMResponseGameId", rid);
+          query.first({
+            success: function(results) {
+              var val = $('input:radio[name=MoMOptions]:checked').val();
+              results.set("ResponseOption", val);
+              results.save();
+              BootstrapDialog.show({
+                title: 'Success',
+                message: 'Your response recorded successfully'
+              });
+            },
+            error: function(error) {
+              $('#divRecordResponse').remove();
+              $('#divInvalidPage').show();
+              console.log("Error: " + error.code + " " + error.message);
+            }
+          });
+        });
 
 
 
-
+      },
+      error: function(error) {
+       $('#divRecordResponse').remove();
+       $('#divInvalidPage').show();
      }
+   });
+}
 
 
-     var addNewMoM = function(){
-      $('#btnCreateMoM').unbind("click").bind("click", function(){
-        var MoMGamesObject = Parse.Object.extend("MoMGames");
-        var tmomgamesbject = new MoMGamesObject();
-        tmomgamesbject.save({GameID: $('#textGameID').val(), Opposition : $('#txtOpposition').val(), GameDate : $('#txtGameDate').val(),Result: $('#txtResult').val(), Option1 : $('#txtOption1').val(), Option2 : $('#txtOption2').val(), Option3 : $('#txtOption3').val(), Option4 : $('#txtOption4').val()}, {
-          success: function(object){
-           BootstrapDialog.show({
-            title: 'Success',
-            message: 'Game Added Successfully !!!'
-          });
-           $('#divCreateNewMoM input').val('');
-           $('#divCreateNewMoM textarea').val('');
-         },
-         error: function(model, error) {
-           BootstrapDialog.show({
-            title: 'Error',
-            message: 'Some Error Occured.'
-          });
-           console.log(error.message);
-         }
-       });
+var addNewMoM = function(){
+  $('#btnCreateMoM').unbind("click").bind("click", function(){
+    var MoMGamesObject = Parse.Object.extend("MoMGames");
+    var tmomgamesbject = new MoMGamesObject();
+    tmomgamesbject.save({GameID: $('#textGameID').val(), Opposition : $('#txtOpposition').val(), GameDate : $('#txtGameDate').val(),Result: $('#txtResult').val(), Option1 : $('#txtOption1').val(), Option2 : $('#txtOption2').val(), Option3 : $('#txtOption3').val(), Option4 : $('#txtOption4').val()}, {
+      success: function(object){
+       BootstrapDialog.show({
+        title: 'Success',
+        message: 'Game Added Successfully !!!'
       });
-    }
-  </script>
+       $('#divCreateNewMoM input').val('');
+       $('#divCreateNewMoM textarea').val('');
+     },
+     error: function(model, error) {
+       BootstrapDialog.show({
+        title: 'Error',
+        message: 'Some Error Occured.'
+      });
+       console.log(error.message);
+     }
+   });
+  });
+}
+
+function replaceAll(find, replace, str) {
+  return str.replace(new RegExp(find, 'g'), replace);
+}
+</script>
 </body>
 
 </html>
