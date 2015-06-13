@@ -165,43 +165,35 @@
 
     var MoMResponseFun = function(pid,rid){
 
-      var MoMResponse = Parse.Object.extend("MoMResponse");
-      var query = new Parse.Query(MoMResponse);
-      query.equalTo("MoMResponseGameId", rid);
-      query.find({
-        success: function(results) {
-          if (results.length >0){
-            var object = results[0];
-            var playerid = object.id.toString();
-            var Opposition = object.get('Opposition');
-            var GameDate = object.get('GameDate');
-            var Option1 = object.get('Option1');
-            var Option2 = object.get('Option2');
-            var Option3 = object.get('Option3');
-            var Option4 = object.get('Option4');
-            var html = "";
-          }
-          else {
-            $('#divRecordResponse').remove();
-            $('#divInvalidPage').show();
-          }
 
+       // 2. Create a Parse Query for Post objects
+       var query = new Parse.Query('MoMGames');
 
-        },
-        error: function(error) {
-         $('#divRecordResponse').remove();
-         $('#divInvalidPage').show();
-         console.log("Error: " + error.code + " " + error.message);
-       }
-     });
+       query.get(rid, {
+        success: function(object) {
+         var playerid = object.id.toString();
+         var Opposition = object.get('Opposition');
+         var GameDate = object.get('GameDate');
+         var Option1 = object.get('Option1');
+         var Option2 = object.get('Option2');
+         var Option3 = object.get('Option3');
+         var Option4 = object.get('Option4');
+         $('#lblopposition').html('Chicago Tigers Vs ' + Opposition);
+       },
+       error: function(error) {
+        $('#divRecordResponse').remove();
+        $('#divInvalidPage').show();
+        console.log("Error: " + error.code + " " + error.message);
+      }
+    });
 
 
 
 
-    }
+     }
 
 
-    var addNewMoM = function(){
+     var addNewMoM = function(){
       $('#btnCreateMoM').unbind("click").bind("click", function(){
         var MoMGamesObject = Parse.Object.extend("MoMGames");
         var tmomgamesbject = new MoMGamesObject();
