@@ -1,0 +1,150 @@
+<!doctype html>
+<head>
+  <meta charset="utf-8">
+  <title>Chicago Tigers - MoM Response</title>
+  <meta name="description" content="My Parse App">
+  <meta name="viewport" content="width=device-width">
+  <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" media="screen" href="http://openfontlibrary.org/face/hanken" rel="stylesheet" type="text/css"/>
+  <link href="css/site.css" rel="stylesheet" type="text/css">
+  <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
+  <script type="text/javascript" src="http://www.parsecdn.com/js/parse-1.4.2.min.js"></script>
+  <script type="text/javascript" src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js"></script>
+  <script type="text/javascript" src="js/myScript.js"></script>
+</head>
+<body>
+  <header>
+    <div style="float:left; padding-left:10px; ">
+      <img src="css/Logo.png" width="50" height="50" />
+    </div>
+    <div style="float:left; padding-left:10px;">
+      Chicago Tigers
+    </div>
+  </header>
+  <div class="center">
+    <div id="divViewResponse">
+
+      <div class="container-fluid">
+        <div class="text-center" id="divGameDetail">
+          <p>Game: <select id="selopposition"></select> 
+          </p>
+          <p>Date: <label id="lblGameDate"></label> 
+          </p>
+          <p>Result: <label id="lblGameResult"></label> 
+          </p>
+
+        </div>
+        
+        <div class="row">
+          <fieldset><legend>Summary</legend>
+            <div   id="divResponses">
+            </div>
+          </fieldset>
+          <br>  
+        </div><!-- /.row this actually does not appear to be needed with the form-horizontal -->
+
+
+      </div><!-- /.container -->
+    </div>
+    
+  </div>
+  <script type="text/javascript">
+    Parse.initialize("nhBnDWutg21Cyx4d6y8RlgKnLtZv1j7jEdt7IKC5", "FTv9XyJAsHVGl6DqufVheLlQNK8Y37fVVceC6CKH");
+    var AllGames = {};
+    $(document).ready(function(){
+      populateOppositions();
+      var gameid = getQueryStringByName('gameid');
+      if(gameid && gameid.length > 0 )
+      {
+        $('#divGameDetail').hide();
+        $('header').hide();
+        setTimeout(function(){
+        $('#selopposition').val(gameid).change();
+      },200);
+      }
+    });
+
+    function getQueryStringByName(name) {
+      name = name.replace(/[\[]/, "\\[").replace(/[\]]/, "\\]");
+      var regex = new RegExp("[\\?&]" + name + "=([^&#]*)"),
+      results = regex.exec(location.search);
+      return results === null ? "" : decodeURIComponent(results[1].replace(/\+/g, " "));
+    }
+
+    
+    var populateOppositions = function()
+    {
+      var MoMGames = Parse.Object.extend("MoMGames");
+      var query = new Parse.Query(MoMGames);
+      query.find({
+        success: function(results) {
+          var    list =   '<option value=""> - select one - </option>';
+
+          for (var i = 0; i < results.length; i++) { 
+            var object = results[i];
+            var Gameid = object.id.toString();
+            var Opposition = object.get('Opposition');
+            AllGames[Gameid] = object;
+            list = list + '<option value="' + Gameid + '">' + Opposition + '</option>';
+          }
+          $('#selopposition').html(list);
+        },
+        error: function(error) {
+          console.log("Error: " + error.code + " " + error.message);
+        }
+      });
+
+      $("#divViewResponse").on("change", "select", function(event) {//assuming questions is already part of the DOM
+       var object = AllGames[$(this).val()];
+       var Opposition = object.get('Opposition');
+       var GameDate = object.get('GameDate');
+       var Result = object.get('Result');
+       var Option1 = object.get('Option1');
+       var Option2 = object.get('Option2');
+       var Option3 = object.get('Option3');
+       var Option4 = object.get('Option4');
+       var option1Count = 0;
+       var option2Count = 0;
+       var option3Count = 0;
+       var option4Count = 0;
+       $('#lblopposition').html('Chicago Tigers Vs ' + Opposition);
+       $('#lblGameResult').html(Result);
+       $('#lblGameDate').html(GameDate);
+       var responseTable = '<table border=1 class="table table-striped">';
+       var MoMResponse = Parse.Object.extend("MoMResponse");
+       var query = new Parse.Query(MoMResponse);
+       query.equalTo("MoMResponseGameId", $(this).val());
+       query.find({
+        success: function(results) {
+         for (var i = 0; i < results.length; i++) { 
+          var object = results[i];
+          var playerid = object.id.toString();
+          var ResponseOption = object.get('ResponseOption');
+          if(ResponseOption === 'Option1') option1Count = option1Count + 1;
+          if(ResponseOption === 'Option2') option2Count = option2Count + 1;
+          if(ResponseOption === 'Option3') option3Count = option3Count + 1;
+          if(ResponseOption === 'Option4') option4Count = option4Count + 1;
+        }
+        if (Option1 && Option1.length > 0)
+          responseTable =  responseTable + '<tr><td>' + Option1 + '</td><td style="text-align:center;">' + option1Count +'</td></tr>';
+        if (Option2 && Option2.length > 0)
+          responseTable =  responseTable + '<tr><td>' + Option2 + '</td><td style="text-align:center;">' + option2Count +'</td></tr>';
+        if (Option3 && Option3.length > 0)
+          responseTable =  responseTable + '<tr><td>' + Option3 + '</td><td style="text-align:center;">' + option3Count +'</td></tr>';
+        if (Option4 && Option4.length > 0)
+          responseTable =  responseTable + '<tr><td>' + Option4 + '</td><td style="text-align:center;">' + option4Count +'</td></tr>';
+        responseTable =  responseTable + '</table>';
+        $('#divResponses').html(responseTable);
+      },
+      error: function(error) {
+        console.log("Error: " + error.code + " " + error.message);
+      }
+    });
+});
+
+}
+
+</script>
+</body>
+
+</html>

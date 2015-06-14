@@ -31,7 +31,7 @@
           </p>
           <p>Date: <label id="lblGameDate"></label> 
           </p>
-          <p>Result: <label id="lblGameResult"></label> 
+          <p>Result: <label id="lblGameResult"></label> &nbsp;&nbsp;<a href='javascript:void(0);' id='ancViewResponse'> View Response </a>
           </p>
         </div>
         
@@ -137,7 +137,12 @@
   <script type="text/javascript">
     Parse.initialize("nhBnDWutg21Cyx4d6y8RlgKnLtZv1j7jEdt7IKC5", "FTv9XyJAsHVGl6DqufVheLlQNK8Y37fVVceC6CKH");
     $(document).ready(function(){
-      $('input:radio').filter(':checked').parent().addClass('checked');
+      $("#divOptions").on("change", "input:radio", function(event) {//assuming questions is already part of the DOM
+        $('input:radio').parent().removeClass('checked');
+        $('input:radio').filter(':checked').parent().addClass('checked');
+
+      });
+
 
       $('#divInvalidPage').hide();
       if(getQueryStringByName('AddNew') === 'y'){
@@ -158,12 +163,6 @@
       $('#divInvalidPage').show();
     });
 
-    function getQueryStringByName(name) {
-      name = name.replace(/[\[]/, "\\[").replace(/[\]]/, "\\]");
-      var regex = new RegExp("[\\?&]" + name + "=([^&#]*)"),
-      results = regex.exec(location.search);
-      return results === null ? "" : decodeURIComponent(results[1].replace(/\+/g, " "));
-    }
 
     var MoMResponseFun = function(pid,rid){
 
@@ -194,12 +193,18 @@
             selectedVal = results.get("ResponseOption");
             setTimeout(function(){ 
               if(selectedVal && selectedVal.length > 0){
-              $('#' + selectedVal).prop('checked',true);
+                $('#' + selectedVal).prop('checked',true);
                 $('input:radio').filter(':checked').parent().addClass('checked');
 
-            }},200);
+              }},200);
             
           },error: function(error){}});
+         $('#ancViewResponse').unbind("click").bind("click", function(){
+           BootstrapDialog.show({
+            title: '',
+            message: '<iframe src="ViewResponse.html?gameid=' + rid + '" width="100%" height=250 />'
+          });
+         });
 
          $('#lblopposition').html('Chicago Tigers Vs ' + Opposition);
          $('#lblGameResult').html(Result);
