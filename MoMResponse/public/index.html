@@ -31,18 +31,19 @@
           </p>
           <p>Date: <label id="lblGameDate"></label> 
           </p>
-          <p>Result: <label id="lblGameResult"></label> &nbsp;&nbsp;<a href='javascript:void(0);' id='ancViewResponse'> View Response </a>
+          <p>Result: <label id="lblGameResult"></label> &nbsp;&nbsp;
           </p>
         </div>
         
         <div class="row">
-          <fieldset><legend>Your Vote</legend>
+        <fieldset style="max-width: 450px; margin: 5px auto 5px auto; text-align: left; padding:10px;"><legend>Your Vote <div class="pull-right"><a href='javascript:void(0);' id='ancViewResponse'> Total Responses </a></div></legend>
             <div   id="divOptions">
             </div>
+            <br>  
+            <div id="divAlreadySelectedMsg"></div>
+            <input type="button" id="btnSubmitVote" value="submit" /> 
           </fieldset>
-          <br>  
-          <div id="divAlreadySelectedMsg"></div>
-          <input type="button" id="btnSubmitVote" value="submit" /> 
+
         </div><!-- /.row this actually does not appear to be needed with the form-horizontal -->
 
 
@@ -163,7 +164,7 @@
       $('#divInvalidPage').show();
     });
 
- function getQueryStringByName(name) {
+    function getQueryStringByName(name) {
       name = name.replace(/[\[]/, "\\[").replace(/[\]]/, "\\]");
       var regex = new RegExp("[\\?&]" + name + "=([^&#]*)"),
       results = regex.exec(location.search);

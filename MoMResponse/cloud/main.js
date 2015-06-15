@@ -48,7 +48,7 @@ function sendEmail(text,subject,fromEmail,fromName,toEmail,toName)
 	console.log("Sending Email");
 	Mandrill.sendEmail({
 		message: {
-			text: text,
+			html: text,
 			subject: subject,
 			from_email: fromEmail,
 			from_name: fromName,
