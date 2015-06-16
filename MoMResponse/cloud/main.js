@@ -19,18 +19,19 @@ Parse.Cloud.afterSave("MoMGames", function(request) {
 				var momResponsebject = new MoMResponse();
 				momResponsebject.save({UID:uid, MoMResponseGameId : objectId, PlayerId : playerid}, {
 					success: function(object){
-						try{
-						var EmailSubject = "Chicago Tigers MoM Selection : " + request.object.get("Opposition");
-						var EmailBody = "Please <a href='http://momresponse.chicric.com/?pid=" + playerid + "&rid=" + objectId+ "'> click here </a> to submit your vote for Player of the game. ";
-						console.log(EmailBody);
-						sendEmail(EmailBody,EmailSubject, 'ChicagoTigers@chicric.com','Chicago Tigers Admin', email,name);
-					} catch(err){
-						console.log(err);
-					}
+						
 					},
 					error: function(model, error) {
 					}    
 				})
+				try{
+					var EmailSubject = "Chicago Tigers MoM Selection : " + request.object.get("Opposition");
+					var EmailBody = "Please <a href='http://momresponse.chicric.com/?pid=" + playerid + "&rid=" + objectId+ "'> click here </a> to submit your vote for Player of the game. ";
+					console.log(EmailBody);
+					sendEmail(EmailBody,EmailSubject, 'ChicagoTigers@chicric.com','Chicago Tigers Admin', email,name);
+				} catch(err){
+					console.log(err);
+				}
 			}},
 			error: function(error) {
 				console.log("Error: " + error.code + " " + error.message);
@@ -38,7 +39,46 @@ Parse.Cloud.afterSave("MoMGames", function(request) {
 		});
 });
 
+Parse.Cloud.define("ResendMoMEmail",function(request,response){
+	console.log("ResendEmail Triggered" + request.params.GameId);
 
+	Parse.Promise.as().then(function() {
+		var promises = [];
+		var objectId = request.params.GameId;
+		var Players = Parse.Object.extend("Players");
+		var query = new Parse.Query(Players);
+		query.equalTo("SendMoMResponseEmail", true);
+		promises.push(
+			query.find({
+				success: function(results) {
+					console.log(results);
+					console.log("Query Player Find success - " + results.length);
+					for (var i = 0; i < results.length; i++) { 
+						var object = results[i];
+						var playerid = object.id.toString();
+						var name = object.get('Name');
+						var email = object.get('Email');
+						var phone = object.get('Phone');
+						try{
+							var EmailSubject = "Chicago Tigers MoM Selection : " + request.params.Opposition;
+							var EmailBody = "Please <a href='http://momresponse.chicric.com/?pid=" + playerid + "&rid=" + objectId+ "'> click here </a> to submit your vote for Player of the game. ";
+							console.log(EmailBody);
+							sendEmail(EmailBody,EmailSubject, 'ChicagoTigers@chicric.com','Chicago Tigers Admin', email,name);
+						} catch(err){
+							console.log(err);
+						}
+					}},
+					error: function(error) {
+						console.log("Error: " + error.code + " " + error.message);
+					}
+				})
+			);
+		return Parse.Promise.when(promises);
+	}).then(function(){
+		console.log("finish");
+		response.success("success");
+	});
+})
 
 
 function sendEmail(text,subject,fromEmail,fromName,toEmail,toName)
@@ -59,7 +99,7 @@ function sendEmail(text,subject,fromEmail,fromName,toEmail,toName)
 			}
 			]
 		},
-		async: true
+		async: false
 	},{
 		success: function(httpResponse) {
 			console.log(httpResponse);
